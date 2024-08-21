@@ -13,18 +13,22 @@ from dataset.crop_model_input import crop_diseased, crop_healthy
 from dataset.preprocess import preprocess
 
 
-def get_x_aug():
-    return A.Compose([
-        A.VerticalFlip(p=0.5),
-        A.HorizontalFlip(p=0.5),
-        A.GaussianBlur(blur_limit=(1, 3), sigma_limit=(0.1, 5), p=0.3),
-        A.GaussNoise(var_limit=(0.0, 0.01), p=0.3),
-        ToTensorV2(),
-    ])
+def get_aug():
+    return A.Compose(
+        [
+            A.VerticalFlip(p=0.5),
+            A.HorizontalFlip(p=0.5),
+            A.GaussianBlur(blur_limit=(1, 3), sigma_limit=(0.1, 5), p=0.3),
+            A.GaussNoise(var_limit=(0.0, 0.01), p=0.3),
+            ToTensorV2(),
+        ]
+    )
+
 
 def uint16_to_float32_min_max(image):
     image = image.astype(np.float32)
     return (image - np.min(image)) / (np.max(image) - np.min(image))
+
 
 class CSAWDataset(Dataset):
     def __init__(
@@ -32,10 +36,10 @@ class CSAWDataset(Dataset):
         data_dir,
         diseased,
         model_dim=256,
-        x_aug=A.Compose([ToTensorV2()]),
+        aug=A.Compose([ToTensorV2()]),
     ):
         self.data_dir = data_dir
-        self.x_augmentations = x_aug
+        self.aug = aug
         self.diseased = diseased
         self.model_dim = model_dim
         self.images = [
@@ -61,16 +65,16 @@ class CSAWDataset(Dataset):
         else:
             image, mask = preprocess(image)
             patch, lc = crop_healthy(image, model_dim=self.model_dim)
-        
+
         image = cv2.resize(image, (self.model_dim,) * 2)
         mask = cv2.resize(mask, (self.model_dim,) * 2)
 
         x = einops.rearrange([patch, lc, image], "c h w -> h w c")
 
-        aug = self.x_augmentations(image=x, mask=mask)
+        augmented = self.aug(image=x, mask=mask)
 
-        x = aug["image"]
-        mask = aug["mask"]
+        x = augmented["image"]
+        mask = augmented["mask"]
 
         y = torch.tensor(int(self.diseased))
 

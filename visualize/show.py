@@ -2,7 +2,8 @@ import matplotlib
 # matplotlib.use('Qt5Agg')
 import matplotlib.pyplot as plt
 
-def show(*images, filename='tmp'):
+
+def show(*images, filename="tmp"):
     num_images = len(images)
     if num_images == 1:
         plt.figure(figsize=(5, 5))
@@ -13,5 +14,5 @@ def show(*images, filename='tmp'):
         for i, image in enumerate(images):
             axs[i].imshow(image, cmap="gray")
             axs[i].axis("off")
-    plt.savefig(filename + '.png')
+    plt.savefig(filename + ".png")
     plt.show()

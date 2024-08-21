@@ -6,7 +6,7 @@ import pydicom
 from show import show
 
 from dataset.crop_model_input import crop_diseased, crop_healthy
-from dataset.csaw import CSAWDataset, get_x_aug
+from dataset.csaw import CSAWDataset, get_aug
 from dataset.dataloader import get_dataloader
 
 
@@ -49,17 +49,23 @@ def healthy_crop():
         patch, lc = crop_healthy(image)
         show(patch, lc)
 
+
 def dataset():
-    for entry in CSAWDataset(_data_path(), x_aug=get_x_aug(), diseased=True):
+    for entry in CSAWDataset(_data_path(), aug=get_aug(), diseased=True):
         x, y, mask = entry
         print(y.item())
         show(*x, mask)
+
 
 def dataloader():
     for entry in get_dataloader(_data_path(), _data_path(), 1):
         x, y, mask = entry
         print(y.item())
-        show(*einops.rearrange(x, '1 c h w -> c h w'), einops.rearrange(mask, '1 h w -> h w'))
+        show(
+            *einops.rearrange(x, "1 c h w -> c h w"),
+            einops.rearrange(mask, "1 h w -> h w")
+        )
+
 
 if __name__ == "__main__":
     # data()
