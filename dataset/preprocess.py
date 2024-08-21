@@ -65,7 +65,7 @@ def keep_only_breast(image):
 
 
 def negate_if_should(image):
-    hist, bins = np.histogram(image.ravel(), bins=2, range=[image.min(), image.max()])
+    hist, _ = np.histogram(image.ravel(), bins=2, range=[image.min(), image.max()])
     return image if hist[0] > hist[-1] else np.max(image) - image
 
 
@@ -87,7 +87,7 @@ def crop_breast(image, breast_mask, mass_mask):
 
 
 def preprocess(image, mass_mask=None):
-    if mass_mask == None:
+    if mass_mask is None:
         mass_mask = np.zeros_like(image)
     image = negate_if_should(image)
     image, breast_mask = keep_only_breast(image)
