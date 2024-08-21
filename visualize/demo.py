@@ -7,7 +7,7 @@ from show import show
 
 from dataset.crop_model_input import crop_diseased, crop_healthy
 from dataset.csaw import CSAWDataset, get_aug
-from dataset.dataloader import get_dataloaders
+from dataset.dataloaders import get_dataloaders
 
 
 def _image():
