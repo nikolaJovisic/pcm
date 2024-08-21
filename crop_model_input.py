@@ -3,8 +3,9 @@ import cv2
 import einops
 import pydicom
 import matplotlib.pyplot as plt
+from icecream import ic
 
-def crop_model_input(image, mask, max_expand=0.5):
+def crop_diseased(image, mask, max_expand=0.2):
     mask_indices = np.argwhere(mask)
     (ymin, xmin), (ymax, xmax) = mask_indices.min(0), mask_indices.max(0) + 1
 
@@ -30,12 +31,32 @@ def crop_model_input(image, mask, max_expand=0.5):
 
     return patch, lc_patch
 
-if __name__ == '__main__':
-    mask = cv2.imread('/home/nikola/projects/pcm/data/csaw/masks/00045_20990909_L_CC_1_mask.png', cv2.IMREAD_GRAYSCALE)
-    image = pydicom.dcmread('/home/nikola/projects/pcm/data/csaw/images/00045_20990909_L_CC_1.dcm').pixel_array
+def crop_healthy(image, max_expand=0.5, min_patch_len=196, epsilon=0.3):
+    patch_len = int(min_patch_len * np.random.uniform(1, 1 + max_expand))
 
-    patch, lc = crop_model_input(image, mask)
+    while True:
+        patch, lc = _try_crop_healthy(image, patch_len)
+        ic(np.mean(patch))
+        ic(np.max(image))
+        if np.mean(patch) > epsilon * np.max(image):
+            return patch, lc
 
+def _try_crop_healthy(image, patch_len):
+    x = np.random.randint(0, image.shape[1] - patch_len)
+    y = np.random.randint(0, image.shape[0] - patch_len)
+
+    patch = image[y:y + patch_len, x:x + patch_len]
+
+    lc_ymin = max(0, y - patch_len)
+    lc_ymax = min(image.shape[0], y + 2 * patch_len)
+    lc_xmin = max(0, x - patch_len)
+    lc_xmax = min(image.shape[1], x + 2 * patch_len)
+
+    lc = image[lc_ymin:lc_ymax, lc_xmin:lc_xmax]
+
+    return patch, lc
+
+def _show(patch, lc):
     fig, axs = plt.subplots(1, 2)
     axs[0].imshow(patch, cmap='gray')
     axs[0].set_title('Patch')
@@ -44,3 +65,20 @@ if __name__ == '__main__':
     axs[1].set_title('Local Context')
     axs[1].axis('off')
     plt.show()
+
+def _demo_diseased(image, mask):
+    patch, lc = crop_diseased(image, mask)
+    _show(patch, lc)
+
+def _demo_healthy(image):
+    patch, lc = crop_healthy(image)
+    _show(patch, lc)
+
+if __name__ == '__main__':
+    mask = cv2.imread('/home/nikola/projects/pcm/data/csaw/masks/00045_20990909_L_CC_1_mask.png', cv2.IMREAD_GRAYSCALE)
+    image = pydicom.dcmread('/home/nikola/projects/pcm/data/csaw/images/00045_20990909_L_CC_1.dcm').pixel_array
+
+    for i in range(5):
+        _demo_diseased(image, mask)
+    for i in range(5):
+        _demo_healthy(image)
