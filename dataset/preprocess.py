@@ -9,8 +9,12 @@ def add_one_if_even(number):
     else:
         return number
 
+
 def create_kernel(img, factor):
-    return add_one_if_even(img.shape[0] // factor), add_one_if_even(img.shape[1] // factor)
+    return add_one_if_even(img.shape[0] // factor), add_one_if_even(
+        img.shape[1] // factor
+    )
+
 
 def binarize(img):
     b_img = img.astype(np.float32)
@@ -31,11 +35,13 @@ def dilate(mask):
 
     return dilated_mask
 
+
 def erode(mask):
     kernel = cv2.getStructuringElement(cv2.MORPH_RECT, create_kernel(mask, 500))
     eroded_mask = cv2.morphologyEx(mask, cv2.MORPH_ERODE, kernel)
 
     return eroded_mask
+
 
 def keep_largest_blob(mask):
     contours, _ = cv2.findContours(mask, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
@@ -62,11 +68,15 @@ def negate_if_should(image):
     hist, bins = np.histogram(image.ravel(), bins=2, range=[image.min(), image.max()])
     return image if hist[0] > hist[-1] else np.max(image) - image
 
+
 def crop_breast(image, breast_mask, mass_mask):
     breast_mask = get_breast_mask(image)
     breast_mask_indices = np.argwhere(breast_mask)
 
-    (ymin, xmin), (ymax, xmax) = breast_mask_indices.min(0), breast_mask_indices.max(0) + 1
+    (ymin, xmin), (ymax, xmax) = (
+        breast_mask_indices.min(0),
+        breast_mask_indices.max(0) + 1,
+    )
 
     ymin = max(0, ymin)
     ymax = min(image.shape[0], ymax)
