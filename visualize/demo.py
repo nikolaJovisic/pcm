@@ -7,7 +7,7 @@ from show import show
 
 from dataset.crop_model_input import crop_diseased, crop_healthy
 from dataset.csaw import CSAWDataset, get_aug
-from dataset.dataloader import get_dataloader
+from dataset.dataloader import get_dataloaders
 
 
 def _image():
@@ -57,8 +57,9 @@ def dataset():
         show(*x, mask)
 
 
-def dataloader():
-    for entry in get_dataloader(_data_path(), _data_path(), 1):
+def dataloaders():
+    train_loader, val_loader, test_loader = get_dataloaders(_data_path(), _data_path(), batch_size=1, train_ratio=0.5, val_ratio=0.25, test_ratio=0.25)
+    for entry in train_loader:
         x, y, mask = entry
         print(y.item())
         show(
@@ -71,5 +72,5 @@ if __name__ == "__main__":
     # data()
     # diseased_crop()
     # healthy_crop()
-    dataset()
-    # dataloader()
+    # dataset()
+    dataloaders()
