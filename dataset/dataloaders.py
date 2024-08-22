@@ -2,20 +2,20 @@ import torch
 from torch.utils.data import DataLoader, WeightedRandomSampler, random_split
 
 from dataset.csaw import CSAWDataset
-
+from settings import settings
 
 def get_dataloaders(
-    healthy_path,
-    diseased_path,
     batch_size,
     train_ratio=0.7,
     val_ratio=0.15,
     test_ratio=0.15,
 ):
+    torch.manual_seed(0)
+
     assert train_ratio + val_ratio + test_ratio == 1.0, "Ratios must sum to 1"
 
-    healthy_dataset = CSAWDataset(healthy_path, diseased=False)
-    diseased_dataset = CSAWDataset(diseased_path, diseased=True)
+    healthy_dataset = CSAWDataset(settings.healthy_path, diseased=False)
+    diseased_dataset = CSAWDataset(settings.diseased_path, diseased=True)
 
     combined_dataset = torch.utils.data.ConcatDataset(
         [healthy_dataset, diseased_dataset]
