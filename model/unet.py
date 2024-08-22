@@ -452,7 +452,3 @@ class Unet(nn.Module):
 
         x = nn.Linear(512, 1)(x)
         return x
-
-
-if __name__ == "__main__":
-    unet = Unet(dim=64, dim_mults=(1, 2, 4, 8))
