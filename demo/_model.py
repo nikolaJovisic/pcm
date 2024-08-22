@@ -17,7 +17,7 @@ def initialized_inference():
         ic(model(x))
 
 
-def weight_loading():
+def weights_loading():
     model = get_mammo_unet(_get_weights_path())
     x = torch.rand(1, 3, 256, 256)
     with torch.no_grad():
@@ -26,4 +26,4 @@ def weight_loading():
 
 if __name__ == "__main__":
     # initialized_inference()
-    weight_loading()
+    weights_loading()
